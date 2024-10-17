@@ -1,4 +1,5 @@
 import json
+import os
 import logging
 from operator import itemgetter
 from typing import (
@@ -50,7 +51,7 @@ from langchain_core.utils import (
     convert_to_secret_str,
     get_from_dict_or_env,
     get_pydantic_field_names,
-    pre_init,
+    secret_from_env,
 )
 from langchain_core.utils.function_calling import convert_to_openai_tool
 from langchain_core.utils.pydantic import is_basemodel_subclass
@@ -211,7 +212,9 @@ class ChatCogCache(BaseChatModel):
     """Timeout for requests to CogCache API. Can be float, httpx.Timeout or
         None."""
 
-    api_key: Optional[SecretStr] = None
+    api_key: Optional[SecretStr] = Field(
+        default_factory=secret_from_env("COGCACHE_API_KEY", default=None),
+    )
     """CogCache API key"""
 
     streaming: bool = False
@@ -226,7 +229,7 @@ class ChatCogCache(BaseChatModel):
     include_response_headers: bool = False
     """Whether to include response headers in the output message response_metadata."""
 
-    api_base: str = Field(default=None)
+    api_base: Optional[str] = Field(default=None)
     """Base URL for CogCache API requests. Leave blank if not using a proxy or service
     emulator."""
 
@@ -276,21 +279,24 @@ class ChatCogCache(BaseChatModel):
         values["model_kwargs"] = extra
         return values
 
-    @pre_init
-    def validate_environment(cls, values: Dict) -> Dict:
+    @model_validator(mode="after")
+    def validate_environment(self) -> Dict:
         """Validate that api key and python package exists in environment."""
-        if values["n"] < 1:
+        if self.n < 1:
             raise ValueError("n must be at least 1.")
-        if values["n"] > 1 and values["streaming"]:
+        if self.n > 1 and self.streaming:
             raise ValueError("n must be 1 when streaming.")
 
-        values["api_key"] = convert_to_secret_str(
-            get_from_dict_or_env(values, "api_key", "COGCACHE_API_KEY")
+        if not self.api_key:
+            raise ValueError(
+                "Did not find api_key, please add an environment variable `COGCACHE_API_KEY` which contains it, or pass `api_key` as a named parameter."
+            )
+
+        self.api_base = (
+            self.api_base or os.getenv("COGCACHE_API_BASE") or DEFAULT_API_BASE
         )
-        values["api_base"] = get_from_dict_or_env(
-            values, "api_base", "COGCACHE_API_BASE", DEFAULT_API_BASE
-        )
-        return values
+
+        return self
 
     @property
     def _default_params(self) -> Dict[str, Any]:
@@ -404,9 +410,9 @@ class ChatCogCache(BaseChatModel):
 
         # TODO: Removed when implemented
         # block features that are not supported
-        _blocked_features_error(
-            {**kwargs, **self.default_headers, **headers, **payload}
-        )
+        # _blocked_features_error(
+        #     {**kwargs, **self.default_headers, **headers, **payload}
+        # )
 
         res = requests.post(
             url=url,
@@ -417,7 +423,7 @@ class ChatCogCache(BaseChatModel):
         )
         if res.status_code != 200:
             raise ValueError(
-                f"Error from cogcache api response: {res.status_code}: {res.text}"
+                f"Error from CogCache api response: {res.status_code}: {res.text}"
             )
         return res
 
@@ -440,7 +446,7 @@ class ChatCogCache(BaseChatModel):
             res = r.json()
         except json.JSONDecodeError as e:
             logger.error("🔴 Error:%s -> %s", e, r.text)
-            raise ValueError(f"Error from cogcache api response: {r.text}") from e
+            raise ValueError(f"Error from CogCache api response: {r.text}") from e
 
         tools: Optional[List[BaseTool]] = (
             [tool["function"] for tool in kwargs.get("tools", [])]
