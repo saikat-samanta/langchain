@@ -341,7 +341,7 @@ class ChatCogCache(BaseChatModel):
             if "message" in c:
                 content_dict = c.get("message")
                 if tools and content_dict.get("tool_calls") and len(tools) > 0:
-                    tools_names = [tool.name for tool in tools]
+                    tools_names = [tool["name"] for tool in tools]
                     for tool in content_dict.get("tool_calls", []):
                         if (
                             tool.get("function")
