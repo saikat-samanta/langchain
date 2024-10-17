@@ -19,8 +19,7 @@ from tests.unit_tests.callbacks.fake_callback_handler import FakeCallbackHandler
 def test_chat_cogcache() -> None:
     """Test ChatCogCache wrapper."""
     chat = ChatCogCache(
-        api_base="http://127.0.0.1:8080/v1",
-        model="gpt-4-1106-preview",
+        model="gpt-4o-2024-08-06",
         temperature=0.7,
         timeout=10.0,
         max_tokens=10,
@@ -33,17 +32,15 @@ def test_chat_cogcache() -> None:
 
 def test_chat_cogcache_model() -> None:
     """Test ChatCogCache wrapper handles model_name."""
-    chat = ChatCogCache(model="foo", api_base="http://127.0.0.1:8080/v1")
+    chat = ChatCogCache(model="foo")
     assert chat.model == "foo"
-    chat = ChatCogCache(model="bar", api_base="http://127.0.0.1:8080/v1")  # type: ignore[call-arg]
+    chat = ChatCogCache(model="bar")  # type: ignore[call-arg]
     assert chat.model == "bar"
 
 
 def test_chat_cogcache_system_message() -> None:
     """Test ChatCogCache wrapper with system message."""
-    chat = ChatCogCache(
-        max_tokens=10, api_base="http://127.0.0.1:8080/v1", model="gpt-4-1106-preview"
-    )
+    chat = ChatCogCache(max_tokens=10, model="gpt-4o-2024-08-06")
     system_message = SystemMessage(content="You are to chat with the user.")
     human_message = HumanMessage(content="Hello")
     response = chat.invoke([system_message, human_message])
@@ -57,8 +54,7 @@ def test_chat_cogcache_generate() -> None:
     chat = ChatCogCache(
         max_tokens=10,
         n=2,
-        api_base="http://127.0.0.1:8080/v1",
-        model="gpt-4-1106-preview",
+        model="gpt-4o-2024-08-06",
     )
     message = HumanMessage(content="Hello")
     response = chat.generate([[message], [message]])
@@ -78,8 +74,7 @@ def test_chat_cogcache_multiple_completions() -> None:
     chat = ChatCogCache(
         max_tokens=10,
         n=5,
-        api_base="http://127.0.0.1:8080/v1",
-        model="gpt-4-1106-preview",
+        model="gpt-4o-2024-08-06",
     )
     message = HumanMessage(content="Hello")
     response = chat._generate([message])
@@ -100,8 +95,7 @@ def test_chat_cogcache_streaming() -> None:
         temperature=0,
         callbacks=callback_manager,
         verbose=True,
-        api_base="http://127.0.0.1:8080/v1",
-        model="gpt-4-1106-preview",
+        model="gpt-4o-2024-08-06",
     )
     message = HumanMessage(content="Hello")
     response = chat.invoke([message])
@@ -126,8 +120,7 @@ def test_chat_cogcache_streaming_generation_info() -> None:
         max_tokens=2,
         temperature=0,
         callbacks=callback_manager,
-        api_base="http://127.0.0.1:8080/v1",
-        model="gpt-4-1106-preview",
+        model="gpt-4o-2024-08-06",
     )
     list(chat.stream("hi"))
     generation = callback.saved_things["generation"]
@@ -137,9 +130,7 @@ def test_chat_cogcache_streaming_generation_info() -> None:
 
 def test_chat_cogcache_llm_output_contains_model_name() -> None:
     """Test llm_output contains model name."""
-    chat = ChatCogCache(
-        max_tokens=10, api_base="http://127.0.0.1:8080/v1", model="gpt-4-1106-preview"
-    )
+    chat = ChatCogCache(max_tokens=10, model="gpt-4o-2024-08-06")
     message = HumanMessage(content="Hello")
     llm_result = chat.generate([[message]])
     assert llm_result.llm_output is not None
@@ -151,8 +142,7 @@ def test_chat_cogcache_streaming_llm_output_contains_model_name() -> None:
     chat = ChatCogCache(
         max_tokens=10,
         streaming=True,
-        api_base="http://127.0.0.1:8080/v1",
-        model="gpt-4-1106-preview",
+        model="gpt-4o-2024-08-06",
     )
     message = HumanMessage(content="Hello")
     llm_result = chat.generate([[message]])
@@ -164,8 +154,7 @@ def test_chat_cogcache_invalid_streaming_params() -> None:
     """Test that streaming correctly invokes on_llm_new_token callback."""
     with pytest.raises(ValueError):
         ChatCogCache(
-            api_base="http://127.0.0.1:8080/v1",
-            model="gpt-4-1106-preview",
+            model="gpt-4o-2024-08-06",
             max_tokens=10,
             streaming=True,
             temperature=0,
@@ -179,8 +168,7 @@ async def test_async_chat_cogcache() -> None:
     chat = ChatCogCache(
         max_tokens=10,
         n=2,
-        api_base="http://127.0.0.1:8080/v1",
-        model="gpt-4-1106-preview",
+        model="gpt-4o-2024-08-06",
     )
     message = HumanMessage(content="Hello")
     response = await chat.agenerate([[message], [message]])
@@ -205,8 +193,7 @@ async def test_async_chat_cogcache_streaming() -> None:
         temperature=0,
         callbacks=callback_manager,
         verbose=True,
-        api_base="http://127.0.0.1:8080/v1",
-        model="gpt-4-1106-preview",
+        model="gpt-4o-2024-08-06",
     )
     message = HumanMessage(content="Hello")
     response = await chat.agenerate([[message], [message]])
@@ -227,8 +214,7 @@ def test_chat_cogcache_extra_kwargs() -> None:
     llm = ChatCogCache(
         foo=3,
         max_tokens=10,
-        api_base="http://127.0.0.1:8080/v1",
-        model="gpt-4-1106-preview",
+        model="gpt-4o-2024-08-06",
     )  # type: ignore[call-arg]
     assert llm.max_tokens == 10
     assert llm.model_kwargs == {"foo": 3}
@@ -237,8 +223,7 @@ def test_chat_cogcache_extra_kwargs() -> None:
     llm = ChatCogCache(
         foo=3,
         model_kwargs={"bar": 2},
-        api_base="http://127.0.0.1:8080/v1",
-        model="gpt-4-1106-preview",
+        model="gpt-4o-2024-08-06",
     )  # type: ignore[call-arg]
     assert llm.model_kwargs == {"foo": 3, "bar": 2}
 
@@ -247,31 +232,27 @@ def test_chat_cogcache_extra_kwargs() -> None:
         ChatCogCache(
             foo=3,
             model_kwargs={"foo": 2},
-            api_base="http://127.0.0.1:8080/v1",
-            model="gpt-4-1106-preview",
+            model="gpt-4o-2024-08-06",
         )  # type: ignore[call-arg]
 
     # Test that if explicit param is specified in kwargs it errors
     with pytest.raises(ValueError):
         ChatCogCache(
-            model_kwargs={"temperature": 0.2}, api_base="http://127.0.0.1:8080/v1"
+            model_kwargs={"temperature": 0.2},
         )
 
     # Test that "model" cannot be specified in kwargs
     with pytest.raises(ValueError):
         ChatCogCache(
             model_kwargs={"model": "gpt-3.5-turbo-instruct"},
-            api_base="http://127.0.0.1:8080/v1",
-            model="gpt-4-1106-preview",
+            model="gpt-4o-2024-08-06",
         )
 
 
 @pytest.mark.scheduled
 def test_cogcache_streaming() -> None:
     """Test streaming tokens from CogCache."""
-    llm = ChatCogCache(
-        max_tokens=10, api_base="http://127.0.0.1:8080/v1", model="gpt-4-1106-preview"
-    )
+    llm = ChatCogCache(max_tokens=10, model="gpt-4o-2024-08-06")
 
     for token in llm.stream("I'm Pickle Rick"):
         assert isinstance(token.content, str)
@@ -280,9 +261,7 @@ def test_cogcache_streaming() -> None:
 @pytest.mark.scheduled
 async def test_cogcache_astream() -> None:
     """Test streaming tokens from CogCache."""
-    llm = ChatCogCache(
-        max_tokens=10, api_base="http://127.0.0.1:8080/v1", model="gpt-4-1106-preview"
-    )
+    llm = ChatCogCache(max_tokens=10, model="gpt-4o-2024-08-06")
 
     async for token in llm.astream("I'm Pickle Rick"):
         assert isinstance(token.content, str)
@@ -291,9 +270,7 @@ async def test_cogcache_astream() -> None:
 @pytest.mark.scheduled
 async def test_cogcache_abatch() -> None:
     """Test streaming tokens from ChatCogCache."""
-    llm = ChatCogCache(
-        max_tokens=10, api_base="http://127.0.0.1:8080/v1", model="gpt-4-1106-preview"
-    )
+    llm = ChatCogCache(max_tokens=10, model="gpt-4o-2024-08-06")
 
     result = await llm.abatch(["I'm Pickle Rick", "I'm not Pickle Rick"])
     for token in result:
@@ -303,9 +280,7 @@ async def test_cogcache_abatch() -> None:
 @pytest.mark.scheduled
 async def test_cogcache_abatch_tags() -> None:
     """Test batch tokens from ChatCogCache."""
-    llm = ChatCogCache(
-        max_tokens=10, api_base="http://127.0.0.1:8080/v1", model="gpt-4-1106-preview"
-    )
+    llm = ChatCogCache(max_tokens=10, model="gpt-4o-2024-08-06")
 
     result = await llm.abatch(
         ["I'm Pickle Rick", "I'm not Pickle Rick"], config={"tags": ["foo"]}
@@ -317,9 +292,7 @@ async def test_cogcache_abatch_tags() -> None:
 @pytest.mark.scheduled
 def test_cogcache_batch() -> None:
     """Test batch tokens from ChatCogCache."""
-    llm = ChatCogCache(
-        max_tokens=10, api_base="http://127.0.0.1:8080/v1", model="gpt-4-1106-preview"
-    )
+    llm = ChatCogCache(max_tokens=10, model="gpt-4o-2024-08-06")
 
     result = llm.batch(["I'm Pickle Rick", "I'm not Pickle Rick"])
     for token in result:
@@ -329,9 +302,7 @@ def test_cogcache_batch() -> None:
 @pytest.mark.scheduled
 async def test_cogcache_ainvoke() -> None:
     """Test invoke tokens from ChatCogCache."""
-    llm = ChatCogCache(
-        max_tokens=10, api_base="http://127.0.0.1:8080/v1", model="gpt-4-1106-preview"
-    )
+    llm = ChatCogCache(max_tokens=10, model="gpt-4o-2024-08-06")
 
     result = await llm.ainvoke("I'm Pickle Rick", config={"tags": ["foo"]})
     assert isinstance(result.content, str)
@@ -340,9 +311,7 @@ async def test_cogcache_ainvoke() -> None:
 @pytest.mark.scheduled
 def test_cogcache_invoke() -> None:
     """Test invoke tokens from ChatCogCache."""
-    llm = ChatCogCache(
-        max_tokens=10, api_base="http://127.0.0.1:8080/v1", model="gpt-4-1106-preview"
-    )
+    llm = ChatCogCache(max_tokens=10, model="gpt-4o-2024-08-06")
 
     result = llm.invoke("I'm Pickle Rick", config=dict(tags=["foo"]))
     assert isinstance(result.content, str)
@@ -351,8 +320,7 @@ def test_cogcache_invoke() -> None:
 def test_cogcache_invoke_with_response_header() -> None:
     "test invoke with response header"
     llm = ChatCogCache(
-        api_base="http://127.0.0.1:8080/v1",
-        model="gpt-4-1106-preview",
+        model="gpt-4o-2024-08-06",
         include_response_headers=True,
     )  # type: ignore[call-arg]
 

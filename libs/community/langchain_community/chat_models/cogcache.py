@@ -180,7 +180,7 @@ class ChatCogCache(BaseChatModel):
             model = ChatCogCache(api_key="my-api-key", model="<model_name>")
     """
 
-    model: str = "gpt-35-turbo-0125"
+    model: str = "gpt-4o-2024-08-06"
     """Model name to use."""
 
     temperature: float = 0.7
@@ -226,7 +226,7 @@ class ChatCogCache(BaseChatModel):
     include_response_headers: bool = False
     """Whether to include response headers in the output message response_metadata."""
 
-    api_base: str = Field(default=DEFAULT_API_BASE)
+    api_base: str = Field(default=None)
     """Base URL for CogCache API requests. Leave blank if not using a proxy or service
     emulator."""
 
@@ -235,11 +235,21 @@ class ChatCogCache(BaseChatModel):
         return {"api_key": "COGCACHE_API_KEY"}
 
     @property
+    def lc_attributes(self) -> Dict[str, Any]:
+        attributes: Dict[str, Any] = {}
+
+        if self.api_base:
+            attributes["api_base"] = self.api_base
+
+        return attributes
+
+    @property
     def lc_serializable(self) -> bool:
         """Return whether this model can be serialized by Langchain."""
         return True
 
     @model_validator(mode="before")
+    @classmethod
     def build_extra(cls, values: Dict[str, Any]) -> Dict[str, Any]:
         """Build extra kwargs from additional params that were passed in."""
         all_required_field_names = get_pydantic_field_names(cls)
