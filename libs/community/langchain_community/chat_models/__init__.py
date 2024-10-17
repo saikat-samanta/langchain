@@ -39,6 +39,9 @@ if TYPE_CHECKING:
     from langchain_community.chat_models.bedrock import (
         BedrockChat,
     )
+    from langchain_community.chat_models.cogcache import (
+        ChatCogCache,
+    )
     from langchain_community.chat_models.cohere import (
         ChatCohere,
     )
@@ -186,9 +189,6 @@ if TYPE_CHECKING:
     )
     from langchain_community.chat_models.zhipuai import (
         ChatZhipuAI,
-    )
-    from langchain_community.chat_models.cogcache import (
-        ChatCogCache,
     )
 __all__ = [
     "AzureChatOpenAI",

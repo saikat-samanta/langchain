@@ -6,9 +6,10 @@ from typing import List
 import pytest
 from langchain_core.messages import (
     AIMessage,
-    HumanMessage,
     ChatMessage,
+    HumanMessage,
 )
+
 from langchain_community.chat_models.cogcache import (
     ChatCogCache,
     _convert_dict_to_message,

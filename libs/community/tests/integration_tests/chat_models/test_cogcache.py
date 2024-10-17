@@ -10,6 +10,7 @@ from langchain_core.outputs import (
     ChatResult,
     LLMResult,
 )
+
 from langchain_community.chat_models import ChatCogCache
 from tests.unit_tests.callbacks.fake_callback_handler import FakeCallbackHandler
 
