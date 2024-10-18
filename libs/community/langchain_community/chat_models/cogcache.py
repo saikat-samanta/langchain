@@ -448,8 +448,6 @@ class ChatCogCache(BaseChatModel):
             if chunk is None:
                 continue
 
-            if chunk.strip() == "[DONE]":
-                break
             try:
                 response = json.loads(chunk)
             except json.JSONDecodeError:
