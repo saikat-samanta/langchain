@@ -152,15 +152,6 @@ def _convert_delta_to_message_chunk(
     return ChatMessageChunk(content=content, role=role, id=_id)
 
 
-def _blocked_features_error(parameters: Mapping[str, Any]) -> None:
-    tools = parameters.get("tools")
-    cache_control = parameters.get("cache_control") or parameters.get("Cache-Control")
-    if tools and len(tools) > 0 and not cache_control == "no-store":
-        raise ValueError(
-            "Tool calling only supported with 'cache_control: no-store' header at this moment."  # noqa: E501
-        )
-
-
 def _is_pydantic_class(obj: Any) -> bool:
     return isinstance(obj, type) and is_basemodel_subclass(obj)
 
@@ -348,23 +339,12 @@ class ChatCogCache(BaseChatModel):
     def _create_chat_result(
         self,
         response: Mapping[str, Any],
-        tools: Optional[List[dict]] = None,
         generation_info: Optional[Dict] = None,
     ) -> ChatResult:
         generations = []
         for c in response.get("choices", []):
             if "message" in c:
                 content_dict = c.get("message")
-                if tools and content_dict.get("tool_calls") and len(tools) > 0:
-                    tools_names = [tool["name"] for tool in tools]
-                    for tool in content_dict.get("tool_calls", []):
-                        if (
-                            tool.get("function")
-                            and tool["function"]["name"] not in tools_names
-                        ):
-                            raise ValueError(
-                                f"Tool '{tool['function']['name']}' not found in schema: {tools}"  # noqa: E501
-                            )
 
                 message = _convert_dict_to_message(content_dict, **response)
                 if message:
@@ -447,16 +427,10 @@ class ChatCogCache(BaseChatModel):
             logger.error("🔴 Error:%s -> %s", e, r.text)
             raise ValueError(f"Error from CogCache api response: {r.text}") from e
 
-        tools: Optional[List[dict]] = (
-            [tool["function"] for tool in kwargs.get("tools", [])]
-            if kwargs.get("tools")
-            else None
-        )
-
         generation_info: Dict = {}
         if self.include_response_headers:
             generation_info["headers"] = dict(r.headers)
-        return self._create_chat_result(res, tools, generation_info)
+        return self._create_chat_result(res, generation_info)
 
     def _stream(
         self,
