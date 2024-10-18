@@ -387,12 +387,6 @@ class ChatCogCache(BaseChatModel):
             "Authorization": f"Bearer {api_key}",
         }
 
-        # TODO: Removed when implemented
-        # block features that are not supported
-        # _blocked_features_error(
-        #     {**kwargs, **self.default_headers, **headers, **payload}
-        # )
-
         res = requests.post(
             url=url,
             timeout=self.request_timeout,
