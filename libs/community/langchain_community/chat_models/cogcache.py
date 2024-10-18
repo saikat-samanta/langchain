@@ -1,6 +1,6 @@
 import json
-import os
 import logging
+import os
 from operator import itemgetter
 from typing import (
     Any,
@@ -48,14 +48,13 @@ from langchain_core.outputs import ChatGeneration, ChatGenerationChunk, ChatResu
 from langchain_core.runnables import Runnable, RunnableMap, RunnablePassthrough
 from langchain_core.tools import BaseTool
 from langchain_core.utils import (
-    convert_to_secret_str,
-    get_from_dict_or_env,
     get_pydantic_field_names,
     secret_from_env,
 )
 from langchain_core.utils.function_calling import convert_to_openai_tool
 from langchain_core.utils.pydantic import is_basemodel_subclass
 from pydantic import BaseModel, Field, SecretStr, model_validator
+from typing_extensions import Self
 
 logger = logging.getLogger(__name__)
 
@@ -280,7 +279,7 @@ class ChatCogCache(BaseChatModel):
         return values
 
     @model_validator(mode="after")
-    def validate_environment(self) -> Dict:
+    def validate_environment(self) -> Self:
         """Validate that api key and python package exists in environment."""
         if self.n < 1:
             raise ValueError("n must be at least 1.")
@@ -289,7 +288,7 @@ class ChatCogCache(BaseChatModel):
 
         if not self.api_key:
             raise ValueError(
-                "Did not find api_key, please add an environment variable `COGCACHE_API_KEY` which contains it, or pass `api_key` as a named parameter."
+                "Did not find api_key, please add an environment variable `COGCACHE_API_KEY` which contains it, or pass `api_key` as a named parameter."  # noqa: E501
             )
 
         self.api_base = (
@@ -349,7 +348,7 @@ class ChatCogCache(BaseChatModel):
     def _create_chat_result(
         self,
         response: Mapping[str, Any],
-        tools: Optional[List[BaseTool]] = None,
+        tools: Optional[List[dict]] = None,
         generation_info: Optional[Dict] = None,
     ) -> ChatResult:
         generations = []
@@ -448,7 +447,7 @@ class ChatCogCache(BaseChatModel):
             logger.error("🔴 Error:%s -> %s", e, r.text)
             raise ValueError(f"Error from CogCache api response: {r.text}") from e
 
-        tools: Optional[List[BaseTool]] = (
+        tools: Optional[List[dict]] = (
             [tool["function"] for tool in kwargs.get("tools", [])]
             if kwargs.get("tools")
             else None
