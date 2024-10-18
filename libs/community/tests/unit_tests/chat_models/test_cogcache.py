@@ -16,7 +16,6 @@ from langchain_community.chat_models.cogcache import (
 )
 
 
-@pytest.mark.requires("cogcache")
 def test_cogcache_model_param() -> None:
     test_cases: List[dict] = [{"model": "foo", "api_key": "foo"}]
 
@@ -48,7 +47,6 @@ def test__convert_dict_to_message_system() -> None:
     assert result == expected_output
 
 
-@pytest.mark.requires("cogcache")
 @pytest.mark.parametrize(
     "model_name", ["gpt-4", "gpt-4-32k", "gpt-35-turbo", "gpt-35-turbo-16k"]
 )
